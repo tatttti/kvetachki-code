@@ -69,4 +69,8 @@ int db_user_delete(int id);
 User* db_user_select_by_id(int id);
 User* db_user_select_by_login(const char *login);
 
+int db_open(const char *filename, sqlite3 **db);
+void db_close(sqlite3 *db);
+int db_execute(sqlite3 *db, const char *sql, char **err_msg);
+
 #endif /* DB_H */
