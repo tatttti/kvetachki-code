@@ -69,7 +69,8 @@ help:
 	@echo "  help        - Show this help message"
 
 coverage:
-	rm -f build/*.o bin/flower_greenhouse
+	rm -rf build bin
+	mkdir -p build bin
 	gcc -Wall -Wextra -g -Iinclude --coverage -c src/main.c -o build/main.o
 	gcc -Wall -Wextra -g -Iinclude --coverage -c src/flower.c -o build/flower.o
 	gcc -Wall -Wextra -g -Iinclude --coverage -c src/composition.c -o build/composition.o
@@ -83,8 +84,8 @@ coverage:
 	gcc -Wall -Wextra -g -Iinclude --coverage -c src/ui_manager.c -o build/ui_manager.o
 	gcc -Wall -Wextra -g -Iinclude --coverage -c src/customer.c -o build/customer.o
 	gcc -Wall -Wextra -g -Iinclude --coverage -c src/db.c -o build/db.o
-	gcc --coverage build/main.o build/flower.o build/composition.o build/order.o build/user.o build/price_policy.o build/order_service.o build/report.o build/ui_order.o build/ui_customer.o build/ui_manager.o build/customer.o build/db.o -o bin/flower_greenhouse -lsqlite3
-	./bin/flower_greenhouse || true
+	gcc --coverage build/*.o -o bin/flower_greenhouse -lsqlite3
+	echo -e "admin\nadmin123\n0\n" | ./bin/flower_greenhouse || true
 	gcovr --html --html-details -o coverage.html
 	@echo "Coverage report generated: coverage.html"
 

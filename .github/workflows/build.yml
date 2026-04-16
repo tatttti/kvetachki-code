@@ -42,25 +42,9 @@ jobs:
       run: |
         echo -e "admin\nadmin123\n0\n" | ./bin/flower_greenhouse || true
 
-    - name: Generate coverage report
+        - name: Generate coverage report
       run: |
-        make clean-all
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/main.c -o build/main.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/flower.c -o build/flower.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/composition.c -o build/composition.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/order.c -o build/order.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/user.c -o build/user.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/price_policy.c -o build/price_policy.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/order_service.c -o build/order_service.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/report.c -o build/report.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/ui_order.c -o build/ui_order.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/ui_customer.c -o build/ui_customer.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/ui_manager.c -o build/ui_manager.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/customer.c -o build/customer.o
-        gcc -Wall -Wextra -g -Iinclude --coverage -c src/db.c -o build/db.o
-        gcc --coverage build/*.o -o bin/flower_greenhouse -lsqlite3
-        echo -e "admin\nadmin123\n0\n" | ./bin/flower_greenhouse || true
-        gcovr --html --html-details -o coverage.html
+        make coverage
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
