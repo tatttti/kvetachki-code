@@ -10,6 +10,8 @@
 #include "../include/user.h"
 #include "../include/db.h"
 
+sqlite3 *g_db = NULL;
+
 extern sqlite3 *g_db;
 
 static void setup(void) {
@@ -36,7 +38,6 @@ static void test_user_create(void) {
     strcpy(u.login, "testuser");
     strcpy(u.password_hash, "hash123");
     strcpy(u.role, "CUSTOMER");
-    u.customer_id = 0;
     
     int rc = user_create(&u);
     if (rc == 0 && u.id > 0) {

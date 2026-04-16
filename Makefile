@@ -68,7 +68,7 @@ help:
 	@echo "  run         - Build and run the program"
 	@echo "  help        - Show this help message"
 
-	coverage:
+coverage:
 	rm -f build/*.o bin/flower_greenhouse
 	gcc -Wall -Wextra -g -Iinclude --coverage -c src/main.c -o build/main.o
 	gcc -Wall -Wextra -g -Iinclude --coverage -c src/flower.c -o build/flower.o
@@ -87,3 +87,16 @@ help:
 	./bin/flower_greenhouse || true
 	gcovr --html --html-details -o coverage.html
 	@echo "Coverage report generated: coverage.html"
+
+test:
+	@echo "Running flower tests..."
+	gcc -Wall -g -Iinclude tests/test_flower.c src/flower.c src/db.c -o test_flower -lsqlite3 && ./test_flower
+	@echo "Running composition tests..."
+	gcc -Wall -g -Iinclude tests/test_composition.c src/composition.c src/flower.c src/db.c -o test_composition -lsqlite3 && ./test_composition
+	@echo "Running order tests..."
+	gcc -Wall -g -Iinclude tests/test_order.c src/order.c src/composition.c src/flower.c src/price_policy.c src/db.c -o test_order -lsqlite3 && ./test_order
+	@echo "Running user tests..."
+	gcc -Wall -g -Iinclude tests/test_user.c src/user.c src/db.c -o test_user -lsqlite3 && ./test_user
+	@echo "Running price policy tests..."
+	gcc -Wall -g -Iinclude tests/test_price_policy.c src/price_policy.c src/flower.c src/composition.c src/db.c -o test_price_policy -lsqlite3 && ./test_price_policy
+	rm -f test_flower test_composition test_order test_user test_price_policy

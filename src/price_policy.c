@@ -240,3 +240,19 @@ int can_increase_flower_price(int flower_id, double new_price) {
     sqlite3_finalize(stmt);
     return allowed;
 }
+
+int price_policy_update_surcharge(const char *urgency_type, double new_surcharge) {
+    if (!urgency_type || new_surcharge < 0) return -1;
+
+    const char *sql = "UPDATE PRICE_POLICY SET surcharge_percent = ?, updated_at = datetime('now') WHERE urgency_type = ?;";
+    sqlite3_stmt *stmt;
+
+    if (sqlite3_prepare_v2(g_db, sql, -1, &stmt, NULL) != SQLITE_OK) return -1;
+
+    sqlite3_bind_double(stmt, 1, new_surcharge);
+    sqlite3_bind_text(stmt, 2, urgency_type, -1, SQLITE_STATIC);
+
+    int rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return (rc == SQLITE_DONE) ? 0 : -1;
+}

@@ -17,7 +17,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y sqlite3 libsqlite3-dev gcovr lcov
+        sudo apt-get install -y sqlite3 libsqlite3-dev gcc make
+        pip install gcovr
 
     - name: Build project
       run: |
@@ -26,34 +27,43 @@ jobs:
 
     - name: Run unit tests
       run: |
-        mkdir -p test_results
-        for test in tests/test_*.c; do
-          if [ -f "$test" ]; then
-            echo "Running $test..."
-            gcc -Wall -Wextra -g -Iinclude "$test" src/flower.c src/db.c -o test_bin -lsqlite3
-            ./test_bin
-          fi
-        done
+        echo "Running flower tests..."
+        gcc -Wall -g -Iinclude tests/test_flower.c src/flower.c src/db.c -o test_flower -lsqlite3 && ./test_flower
+        echo "Running composition tests..."
+        gcc -Wall -g -Iinclude tests/test_composition.c src/composition.c src/flower.c src/db.c -o test_composition -lsqlite3 && ./test_composition
+        echo "Running order tests..."
+        gcc -Wall -g -Iinclude tests/test_order.c src/order.c src/composition.c src/flower.c src/price_policy.c src/db.c -o test_order -lsqlite3 && ./test_order
+        echo "Running user tests..."
+        gcc -Wall -g -Iinclude tests/test_user.c src/user.c src/db.c -o test_user -lsqlite3 && ./test_user
+        echo "Running price policy tests..."
+        gcc -Wall -g -Iinclude tests/test_price_policy.c src/price_policy.c src/flower.c src/composition.c src/db.c -o test_price_policy -lsqlite3 && ./test_price_policy
 
     - name: Run main program (smoke test)
       run: |
-        echo "admin\nadmin123" | ./bin/flower_greenhouse || true
+        echo -e "admin\nadmin123\n0\n" | ./bin/flower_greenhouse || true
 
     - name: Generate coverage report
       run: |
         make clean-all
-        make coverage
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/main.c -o build/main.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/flower.c -o build/flower.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/composition.c -o build/composition.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/order.c -o build/order.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/user.c -o build/user.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/price_policy.c -o build/price_policy.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/order_service.c -o build/order_service.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/report.c -o build/report.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/ui_order.c -o build/ui_order.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/ui_customer.c -o build/ui_customer.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/ui_manager.c -o build/ui_manager.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/customer.c -o build/customer.o
+        gcc -Wall -Wextra -g -Iinclude --coverage -c src/db.c -o build/db.o
+        gcc --coverage build/*.o -o bin/flower_greenhouse -lsqlite3
+        echo -e "admin\nadmin123\n0\n" | ./bin/flower_greenhouse || true
         gcovr --html --html-details -o coverage.html
-        gcovr --xml -o coverage.xml
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report
         path: coverage.html
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: test_results/

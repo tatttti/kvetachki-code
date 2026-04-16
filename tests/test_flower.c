@@ -10,6 +10,8 @@
 #include "../include/flower.h"
 #include "../include/db.h"
 
+sqlite3 *g_db = NULL;
+
 extern sqlite3 *g_db;
 
 static void setup(void) {
