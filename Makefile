@@ -100,4 +100,8 @@ test:
 	gcc -Wall -g -Iinclude tests/test_user.c src/user.c src/db.c -o test_user -lsqlite3 && ./test_user
 	@echo "Running price policy tests..."
 	gcc -Wall -g -Iinclude tests/test_price_policy.c src/price_policy.c src/flower.c src/composition.c src/db.c -o test_price_policy -lsqlite3 && ./test_price_policy
-	rm -f test_flower test_composition test_order test_user test_price_policy
+	@echo "Running order service tests..."
+	gcc -Wall -g -Iinclude tests/test_order_service.c src/order_service.c src/order.c src/composition.c src/flower.c src/price_policy.c src/customer.c src/db.c -o test_order_service -lsqlite3 && ./test_order_service
+	@echo "Running report tests..."
+	gcc -Wall -g -Iinclude tests/test_report.c src/report.c src/order.c src/composition.c src/flower.c src/price_policy.c src/db.c -o test_report -lsqlite3 && ./test_report
+	rm -f test_flower test_composition test_order test_user test_price_policy test_order_service test_report
