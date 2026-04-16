@@ -28,6 +28,7 @@ PricePolicy* price_policy_find_by_urgency(const char *urgency_type);
 PricePolicy** price_policy_find_all(int *count);
 void price_policy_free(PricePolicy *pp);
 void price_policy_print(const PricePolicy *pp);
+int can_increase_flower_price(int flower_id, double new_price);
 
 /* Helper function to get surcharge percentage directly */
 double get_surcharge_by_urgency(const char *urgency_type);
