@@ -12,6 +12,7 @@
 #include "report.h"
 #include "price_policy.h"
 #include "db.h"
+#include "price_policy.h"
 
 extern sqlite3 *g_db;
 
@@ -60,21 +61,37 @@ static void flower_management_menu(void) {
                     break;
                 }
                 printf("Current: %s (%s) - %.2f\n", f->name, f->variety, f->unit_price);
+
+                double new_price = f->unit_price;
+                printf("Enter new unit price (current: %.2f): ", f->unit_price);
+                char price_buf[32];
+                fgets(price_buf, sizeof(price_buf), stdin);
+                if (strlen(price_buf) > 1) {
+                    sscanf(price_buf, "%lf", &new_price);
+                }
+
+                if (new_price != f->unit_price) {
+                    if (!can_increase_flower_price(f->id, new_price)) {
+                        printf("Error: Price increase would raise composition price by more than 10%%\n");
+                        printf("Operation not allowed.\n");
+                        flower_free(f);
+                        break;
+                    }
+                }
+
+                f->unit_price = new_price;
+
                 printf("Enter new name (or press Enter to keep): ");
                 char buf[256];
                 fgets(buf, sizeof(buf), stdin);
                 buf[strcspn(buf, "\n")] = 0;
                 if (strlen(buf) > 0) strcpy(f->name, buf);
+
                 printf("Enter new variety: ");
                 fgets(buf, sizeof(buf), stdin);
                 buf[strcspn(buf, "\n")] = 0;
                 if (strlen(buf) > 0) strcpy(f->variety, buf);
-                printf("Enter new unit price: ");
-                char price_buf[32];
-                fgets(price_buf, sizeof(price_buf), stdin);
-                if (strlen(price_buf) > 1) {
-                    sscanf(price_buf, "%lf", &f->unit_price);
-                }
+
                 if (flower_update(f) == 0) {
                     printf("Flower updated.\n");
                 } else {
