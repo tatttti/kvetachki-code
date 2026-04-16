@@ -7,6 +7,9 @@
 #ifndef PRICE_POLICY_H
 #define PRICE_POLICY_H
 
+#include "flower.h"
+#include "composition.h"
+
 /**
  * @struct PricePolicy
  * @brief Configuration for urgency surcharges
@@ -29,6 +32,7 @@ PricePolicy** price_policy_find_all(int *count);
 void price_policy_free(PricePolicy *pp);
 void price_policy_print(const PricePolicy *pp);
 int can_increase_flower_price(int flower_id, double new_price);
+int price_policy_update_surcharge(const char *urgency_type, double new_surcharge);
 
 /* Helper function to get surcharge percentage directly */
 double get_surcharge_by_urgency(const char *urgency_type);

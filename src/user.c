@@ -217,3 +217,17 @@ User* db_user_select_by_id(int id) {
 User* db_user_select_by_login(const char *login) {
     return user_find_by_login(login);
 }
+
+int user_get_customer_id(int user_id) {
+    const char *sql = "SELECT customer_id FROM USERS WHERE id = ?;";
+    sqlite3_stmt *stmt;
+    sqlite3_prepare_v2(g_db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, user_id);
+
+    int customer_id = -1;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        customer_id = sqlite3_column_int(stmt, 0);
+    }
+    sqlite3_finalize(stmt);
+    return customer_id;
+}

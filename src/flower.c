@@ -124,3 +124,43 @@ void flower_print(const Flower *f) {
     printf("ID: %d | Name: %s | Variety: %s | Price: %.2f | Created: %s\n",
            f->id, f->name, f->variety, f->unit_price, f->created_at);
 }
+
+Flower** flower_find_all(int *count) {
+    *count = 0;
+    const char *sql = "SELECT id, name, variety, unit_price, created_at FROM FLOWERS;";
+    sqlite3_stmt *stmt;
+
+    if (sqlite3_prepare_v2(g_db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        return NULL;
+    }
+
+    /* First count rows */
+    int rows = 0;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        rows++;
+    }
+    sqlite3_reset(stmt);
+
+    if (rows == 0) {
+        sqlite3_finalize(stmt);
+        return NULL;
+    }
+
+    /* Allocate array of pointers */
+    Flower **arr = (Flower**)malloc(sizeof(Flower*) * rows);
+    int idx = 0;
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        Flower *f = (Flower*)malloc(sizeof(Flower));
+        f->id = sqlite3_column_int(stmt, 0);
+        strcpy(f->name, (const char*)sqlite3_column_text(stmt, 1));
+        strcpy(f->variety, (const char*)sqlite3_column_text(stmt, 2));
+        f->unit_price = sqlite3_column_double(stmt, 3);
+        strcpy(f->created_at, (const char*)sqlite3_column_text(stmt, 4));
+        arr[idx++] = f;
+    }
+
+    *count = idx;
+    sqlite3_finalize(stmt);
+    return arr;
+}

@@ -15,6 +15,11 @@
 
 extern sqlite3 *g_db;
 
+/* Function prototypes */
+void ui_order_handle_create(void);
+void ui_order_handle_update(void);
+void ui_order_handle_delete(void);
+
 static void print_order_list(Order **orders, int count) {
     if (!orders || count == 0) {
         printf("No orders found.\n");

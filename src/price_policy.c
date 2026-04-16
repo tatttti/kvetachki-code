@@ -9,6 +9,8 @@
 #include <string.h>
 #include "price_policy.h"
 #include "db.h"
+#include "flower.h"
+#include "composition.h"
 
 extern sqlite3 *g_db;
 

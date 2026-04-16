@@ -23,5 +23,6 @@ Flower* flower_find_by_id(int id);
 Flower* flower_find_by_name(const char *name);
 void flower_free(Flower *f);
 void flower_print(const Flower *f);
+Flower** flower_find_all(int *count);
 
 #endif /* FLOWER_H */

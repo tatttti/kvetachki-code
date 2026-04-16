@@ -12,11 +12,10 @@
 #include "report.h"
 #include "price_policy.h"
 #include "db.h"
-#include "price_policy.h"
 
 extern sqlite3 *g_db;
 
-static void flower_management_menu(void) {
+void flower_management_menu(void) {
     int choice;
     do {
         printf("\n=== Flower Management ===\n");
@@ -24,12 +23,13 @@ static void flower_management_menu(void) {
         printf("2. Update flower\n");
         printf("3. Delete flower\n");
         printf("4. View all flowers\n");
-        printf("5. Find flower by name\n");
+        printf("5. Find flower by ID\n");
+        printf("6. Find flower by name\n");
         printf("0. Back\n");
         printf("Choice: ");
         scanf("%d", &choice);
         getchar();
-        
+
         switch (choice) {
             case 1: {
                 Flower f;
@@ -70,6 +70,7 @@ static void flower_management_menu(void) {
                     sscanf(price_buf, "%lf", &new_price);
                 }
 
+                /* Check price increase limit (10%) */
                 if (new_price != f->unit_price) {
                     if (!can_increase_flower_price(f->id, new_price)) {
                         printf("Error: Price increase would raise composition price by more than 10%%\n");
@@ -78,7 +79,6 @@ static void flower_management_menu(void) {
                         break;
                     }
                 }
-
                 f->unit_price = new_price;
 
                 printf("Enter new name (or press Enter to keep): ");
@@ -113,11 +113,35 @@ static void flower_management_menu(void) {
                 break;
             }
             case 4: {
-                /* Simplified: would need flower_find_all */
-                printf("Feature: View all flowers (implementation needed)\n");
+                int count = 0;
+                Flower **flowers = flower_find_all(&count);
+                if (!flowers || count == 0) {
+                    printf("No flowers found.\n");
+                } else {
+                    printf("\n=== All Flowers ===\n");
+                    for (int i = 0; i < count; i++) {
+                        flower_print(flowers[i]);
+                        flower_free(flowers[i]);
+                    }
+                    free(flowers);
+                }
                 break;
             }
             case 5: {
+                int id;
+                printf("Enter flower ID: ");
+                scanf("%d", &id);
+                getchar();
+                Flower *f = flower_find_by_id(id);
+                if (f) {
+                    flower_print(f);
+                    flower_free(f);
+                } else {
+                    printf("Flower not found.\n");
+                }
+                break;
+            }
+            case 6: {
                 char name[101];
                 printf("Enter flower name: ");
                 fgets(name, sizeof(name), stdin);
@@ -131,8 +155,10 @@ static void flower_management_menu(void) {
                 }
                 break;
             }
-            case 0: break;
-            default: printf("Invalid choice.\n");
+            case 0:
+                break;
+            default:
+                printf("Invalid choice.\n");
         }
     } while (choice != 0);
 }
@@ -269,6 +295,99 @@ static void composition_management_menu(void) {
     } while (choice != 0);
 }
 
+int price_policy_update_surcharge(const char *urgency_type, double new_surcharge) {
+    if (!urgency_type || new_surcharge < 0) return -1;
+
+    const char *sql = "UPDATE PRICE_POLICY SET surcharge_percent = ?, updated_at = datetime('now') WHERE urgency_type = ?;";
+    sqlite3_stmt *stmt;
+
+    if (sqlite3_prepare_v2(g_db, sql, -1, &stmt, NULL) != SQLITE_OK) return -1;
+
+    sqlite3_bind_double(stmt, 1, new_surcharge);
+    sqlite3_bind_text(stmt, 2, urgency_type, -1, SQLITE_STATIC);
+
+    int rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return (rc == SQLITE_DONE) ? 0 : -1;
+}
+
+void price_policy_menu(void) {
+    int choice;
+    do {
+        printf("\n=== Price Policy ===\n");
+        printf("1. View current surcharges\n");
+        printf("2. Update surcharge\n");
+        printf("0. Back\n");
+        printf("Choice: ");
+        scanf("%d", &choice);
+        getchar();
+
+        switch (choice) {
+            case 1: {
+                printf("\nCurrent surcharges:\n");
+                printf("  normal: 0%%\n");
+                printf("  1day: 25%%\n");
+                printf("  2days: 15%%\n");
+                break;
+            }
+            case 2: {
+                int sub_choice;
+                printf("\n=== Update Surcharge ===\n");
+                printf("1. Normal (currently 0%%)\n");
+                printf("2. 1 day (currently 25%%)\n");
+                printf("3. 2 days (currently 15%%)\n");
+                printf("0. Back\n");
+                printf("Choice: ");
+                scanf("%d", &sub_choice);
+                getchar();
+
+                double new_surcharge;
+                const char *type = NULL;
+
+                switch (sub_choice) {
+                    case 1:
+                        type = "normal";
+                        printf("Enter new surcharge percentage for normal delivery (current 0): ");
+                        scanf("%lf", &new_surcharge);
+                        getchar();
+                        break;
+                    case 2:
+                        type = "1day";
+                        printf("Enter new surcharge percentage for 1-day delivery (current 25): ");
+                        scanf("%lf", &new_surcharge);
+                        getchar();
+                        break;
+                    case 3:
+                        type = "2days";
+                        printf("Enter new surcharge percentage for 2-day delivery (current 15): ");
+                        scanf("%lf", &new_surcharge);
+                        getchar();
+                        break;
+                    case 0:
+                        break;
+                    default:
+                        printf("Invalid choice.\n");
+                        break;
+                }
+
+                if (type != NULL) {
+                    if (price_policy_update_surcharge(type, new_surcharge) == 0) {
+                        printf("Surcharge for '%s' updated to %.2f%%\n", type, new_surcharge);
+                    } else {
+                        printf("Failed to update surcharge.\n");
+                    }
+                }
+                break;
+            }
+            case 0:
+                break;
+            default:
+                printf("Invalid choice.\n");
+        }
+    } while (choice != 0);
+}
+
+
 void ui_manager_show_menu(void) {
     int choice;
     do {
@@ -355,13 +474,7 @@ void ui_manager_show_menu(void) {
                 composition_management_menu();
                 break;
             case 4: {
-                printf("\n=== Price Policy ===\n");
-                PricePolicy **policies = price_policy_find_all(NULL);
-                /* Simplified display */
-                printf("Default surcharges:\n");
-                printf("  normal: 0%%\n");
-                printf("  1day: 25%%\n");
-                printf("  2days: 15%%\n");
+                price_policy_menu();
                 break;
             }
             case 0:

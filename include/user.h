@@ -35,5 +35,6 @@ void user_print(const User *u);
 
 /* Password hashing (simple hash for demo) */
 void hash_password(const char *password, char *output, int size);
+int user_get_customer_id(int user_id);
 
 #endif /* USER_H */
