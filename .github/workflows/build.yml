@@ -1,0 +1,59 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, development ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sqlite3 libsqlite3-dev gcovr lcov
+
+    - name: Build project
+      run: |
+        make clean-all
+        make
+
+    - name: Run unit tests
+      run: |
+        mkdir -p test_results
+        for test in tests/test_*.c; do
+          if [ -f "$test" ]; then
+            echo "Running $test..."
+            gcc -Wall -Wextra -g -Iinclude "$test" src/flower.c src/db.c -o test_bin -lsqlite3
+            ./test_bin
+          fi
+        done
+
+    - name: Run main program (smoke test)
+      run: |
+        echo "admin\nadmin123" | ./bin/flower_greenhouse || true
+
+    - name: Generate coverage report
+      run: |
+        make clean-all
+        make coverage
+        gcovr --html --html-details -o coverage.html
+        gcovr --xml -o coverage.xml
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage.html
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: test_results/
