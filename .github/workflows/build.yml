@@ -42,7 +42,7 @@ jobs:
       run: |
         echo -e "admin\nadmin123\n0\n" | ./bin/flower_greenhouse || true
 
-        - name: Generate coverage report
+    - name: Generate coverage report
       run: |
         make coverage
 
