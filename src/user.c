@@ -197,3 +197,23 @@ void user_print(const User *u) {
     printf("ID: %d | Login: %s | Role: %s | Created: %s\n",
            u->id, u->login, u->role, u->created_at);
 }
+
+int db_user_insert(User *u) {
+    return user_create(u);
+}
+
+int db_user_update(User *u) {
+    return user_update(u);
+}
+
+int db_user_delete(int id) {
+    return user_delete(id);
+}
+
+User* db_user_select_by_id(int id) {
+    return user_find_by_id(id);
+}
+
+User* db_user_select_by_login(const char *login) {
+    return user_find_by_login(login);
+}

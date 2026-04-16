@@ -62,4 +62,11 @@ int db_price_policy_insert(PricePolicy *pp);
 int db_price_policy_update(PricePolicy *pp);
 PricePolicy* db_price_policy_select_by_urgency(const char *urgency_type);
 
+/* User CRUD (add to existing db.h) */
+int db_user_insert(User *u);
+int db_user_update(User *u);
+int db_user_delete(int id);
+User* db_user_select_by_id(int id);
+User* db_user_select_by_login(const char *login);
+
 #endif /* DB_H */
