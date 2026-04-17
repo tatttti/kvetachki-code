@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Глоссарий – Flower Greenhouse</title>
+<style>
+body { font-family: Arial, sans-serif; margin:40px; background:#f0f2f5; }
+.container { max-width:900px; margin:auto; background:#fff; border-radius:15px; padding:30px; box-shadow:0 5px 20px rgba(0,0,0,0.1); }
+h1,h2,h3 { color:#2c3e50; }
+p { line-height:1.6; }
+.back { display:inline-block; margin-top:20px; padding:10px 20px; background:#667eea; color:#fff; text-decoration:none; border-radius:8px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Глоссарий предметной области</h1>
+
+<p>Глоссарий фиксирует терминологию предметной области проекта <strong>Flower Greenhouse System</strong> и обеспечивает единое понимание сущностей и процессов.</p>
+
+<h2>Основные термины</h2>
+
+<h3>Цветок (Flower)</h3>
+<p>Базовая товарная единица. Имеет название, сорт, цену и используется при формировании композиций.</p>
+
+<h3>Композиция (Composition)</h3>
+<p>Готовый цветочный набор, состоящий из одного или нескольких цветов. Имеет название, описание и базовую стоимость.</p>
+
+<h3>Состав композиции (Composition Items)</h3>
+<p>Связь «многие‑ко‑многим» между цветами и композициями с указанием количества каждого цветка.</p>
+
+<h3>Клиент (Customer)</h3>
+<p>Пользователь, который просматривает каталог и оформляет заказы.</p>
+
+<h3>Менеджер (Admin / Manager)</h3>
+<p>Пользователь с административными правами: управляет справочниками, заказами, политикой наценок и отчётами.</p>
+
+<h3>Заказ (Order)</h3>
+<p>Запрос на покупку композиции с указанием количества, срочности, дат и итоговой стоимости.</p>
+
+<h3>Срочность (Urgency)</h3>
+<p>Параметр, влияющий на стоимость заказа: normal, 1day, 2days.</p>
+
+<h3>Политика наценок (Price Policy)</h3>
+<p>Таблица с процентами надбавки в зависимости от срочности.</p>
+
+<h3>Отчёт (Report)</h3>
+<p>Аналитическая информация: выручка, популярность композиций, статистика срочности, использование цветов, продажи.</p>
+
+<h3>База данных (Database)</h3>
+<p>SQLite‑хранилище с таблицами USERS, CUSTOMERS, FLOWERS, COMPOSITIONS, COMPOSITION_ITEMS, ORDERS, ORDER_SUMMARIES, PRICE_POLICY.</p>
+
+<a href="index.html" class="back">← На главную</a>
+</div>
+</body>
+</html>
