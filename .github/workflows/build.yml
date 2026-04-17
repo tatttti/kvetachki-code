@@ -1,0 +1,53 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, development ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sqlite3 libsqlite3-dev gcc make
+        pip install gcovr
+
+    - name: Build project
+      run: |
+        make clean-all
+        make
+
+    - name: Run unit tests
+      run: |
+        echo "Running flower tests..."
+        gcc -Wall -g -Iinclude tests/test_flower.c src/flower.c src/db.c -o test_flower -lsqlite3 && ./test_flower
+        echo "Running composition tests..."
+        gcc -Wall -g -Iinclude tests/test_composition.c src/composition.c src/flower.c src/db.c -o test_composition -lsqlite3 && ./test_composition
+        echo "Running order tests..."
+        gcc -Wall -g -Iinclude tests/test_order.c src/order.c src/composition.c src/flower.c src/price_policy.c src/db.c -o test_order -lsqlite3 && ./test_order
+        echo "Running user tests..."
+        gcc -Wall -g -Iinclude tests/test_user.c src/user.c src/db.c -o test_user -lsqlite3 && ./test_user
+        echo "Running price policy tests..."
+        gcc -Wall -g -Iinclude tests/test_price_policy.c src/price_policy.c src/flower.c src/composition.c src/db.c -o test_price_policy -lsqlite3 && ./test_price_policy
+
+    - name: Run main program (smoke test)
+      run: |
+        echo -e "admin\nadmin123\n0\n" | ./bin/flower_greenhouse || true
+
+    - name: Generate coverage report
+      run: |
+        make coverage
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage.html
